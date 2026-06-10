@@ -31,25 +31,17 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Check if the user is an admin.
-     */
+    
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    /**
-     * Check if the user is a customer.
-     */
     public function isCustomer(): bool
     {
         return $this->role === 'customer';
     }
 
-    /**
-     * Get all transactions belonging to this user.
-     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
