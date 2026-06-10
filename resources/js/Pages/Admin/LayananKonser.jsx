@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { formatRp } from "@/utils/formatter";
@@ -46,13 +46,52 @@ export default function LayananKonser({ concerts, filters, artists }) {
         }
     }
 
-    function handleArtistSelect(e) {
-        const value = Array.from(
-            e.target.selectedOptions,
-            (option) => option.value,
-        );
-        setData("artist_ids", value);
+    // --- Autocomplete Artis ---
+    const [artistSearch, setArtistSearch] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const artistInputRef = useRef(null);
+    const suggestionsRef = useRef(null);
+
+    // Artis yang saat ini terpilih (array of artist objects)
+    const [selectedArtists, setSelectedArtists] = useState([]);
+
+    // Filtered suggestions berdasarkan pencarian
+    const filteredArtists = artistSearch.trim()
+        ? artists.filter(
+            (a) =>
+                a.name.toLowerCase().includes(artistSearch.toLowerCase()) &&
+                !selectedArtists.find((s) => s.id === a.id)
+        )
+        : [];
+
+    function addArtist(artist) {
+        const newSelected = [...selectedArtists, artist];
+        setSelectedArtists(newSelected);
+        setData("artist_ids", newSelected.map((a) => a.id.toString()));
+        setArtistSearch("");
+        setShowSuggestions(false);
     }
+
+    function removeArtist(artistId) {
+        const newSelected = selectedArtists.filter((a) => a.id !== artistId);
+        setSelectedArtists(newSelected);
+        setData("artist_ids", newSelected.map((a) => a.id.toString()));
+    }
+
+    // Tutup dropdown saat klik di luar
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (
+                artistInputRef.current && !artistInputRef.current.contains(e.target) &&
+                suggestionsRef.current && !suggestionsRef.current.contains(e.target)
+            ) {
+                setShowSuggestions(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+    // --------------------------
 
     function addCategory() {
         setData("ticket_categories", [
@@ -80,6 +119,8 @@ export default function LayananKonser({ concerts, filters, artists }) {
                 setOpenModal(false);
                 reset();
                 setPreviewUrl("");
+                setSelectedArtists([]);
+                setArtistSearch("");
             },
         });
     }
@@ -361,411 +402,308 @@ export default function LayananKonser({ concerts, filters, artists }) {
                                 onSubmit={submitForm}
                                 className="space-y-8"
                             >
-                                <div>
-                                    <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">
-                                        1. Informasi Dasar
-                                    </h3>
+                                <div className="space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Nama Konser{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                JUDUL KONSER <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.title}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "title",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={`w-full px-4 py-2.5 border ${errors.title ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50`}
+                                                onChange={(e) => setData("title", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.title ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white focus:ring-1 focus:ring-blue-500 transition-colors`}
+                                                placeholder="Contoh: Dewa 19 Live in Concert"
                                             />
-                                            {errors.title && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.title}
-                                                </p>
-                                            )}
+                                            {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
                                         </div>
+
+                                        <div>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                NAMA VENUE <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.venue_name}
+                                                onChange={(e) => setData("venue_name", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.venue_name ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                                placeholder="Contoh: Gelora Bung Karno"
+                                            />
+                                            {errors.venue_name && <p className="mt-1 text-xs text-red-500">{errors.venue_name}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                KOTA <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.city}
+                                                onChange={(e) => setData("city", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.city ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                                placeholder="Contoh: Jakarta"
+                                            />
+                                            {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                TANGGAL ACARA <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={data.event_date}
+                                                onChange={(e) => setData("event_date", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.event_date ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                            />
+                                            {errors.event_date && <p className="mt-1 text-xs text-red-500">{errors.event_date}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                WAKTU MULAI <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="time"
+                                                value={data.event_time}
+                                                onChange={(e) => setData("event_time", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.event_time ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                            />
+                                            {errors.event_time && <p className="mt-1 text-xs text-red-500">{errors.event_time}</p>}
+                                        </div>
+
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Banner Konser{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                STATUS <span className="text-red-500">*</span>
+                                            </label>
+                                            <select
+                                                value={data.status}
+                                                onChange={(e) => setData("status", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.status ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                            >
+                                                <option value="" disabled>-- Pilih Status --</option>
+                                                <option value="active">Aktif / Publik</option>
+                                                <option value="draft">Draft</option>
+                                                <option value="completed">Selesai</option>
+                                            </select>
+                                            {errors.status && <p className="mt-1 text-xs text-red-500">{errors.status}</p>}
+                                        </div>
+
+                                        <div className="md:col-span-2">
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                DESKRIPSI <span className="text-gray-400 font-normal lowercase">(opsional)</span>
+                                            </label>
+                                            <textarea
+                                                rows="4"
+                                                value={data.description || ""}
+                                                onChange={(e) => setData("description", e.target.value)}
+                                                className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
+                                                placeholder="Ceritakan detail mengenai konser ini..."
+                                            ></textarea>
+                                        </div>
+
+                                        <div className="md:col-span-2">
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                GAMBAR BANNER <span className="text-gray-400 font-normal lowercase">(opsional)</span>
                                             </label>
                                             {previewUrl && (
                                                 <img
                                                     src={previewUrl}
                                                     alt="Preview"
-                                                    className="w-32 h-20 object-cover rounded-xl mb-3 shadow-sm border border-gray-200"
-                                                    onError={() =>
-                                                        setPreviewUrl("")
-                                                    }
+                                                    className="w-full h-40 object-cover rounded-xl mb-3 shadow-sm border border-gray-200"
+                                                    onError={() => setPreviewUrl("")}
                                                 />
                                             )}
-                                            <input
-                                                type="file"
-                                                onChange={handleFile}
-                                                accept="image/*"
-                                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-                                            />
-                                            {errors.banner && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.banner}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Venue (Tempat){" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                            <label className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 bg-[#fafafa] transition-colors">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    <span className="text-sm font-semibold text-gray-600">Klik untuk upload gambar (JPG, PNG, WebP)</span>
+                                                </div>
+                                                <input
+                                                    type="file"
+                                                    onChange={handleFile}
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                />
                                             </label>
-                                            <input
-                                                type="text"
-                                                value={data.venue_name}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "venue_name",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={`w-full px-4 py-2.5 border ${errors.venue_name ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50`}
-                                            />
-                                            {errors.venue_name && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.venue_name}
-                                                </p>
-                                            )}
+                                            {errors.banner && <p className="mt-1 text-xs text-red-500">{errors.banner}</p>}
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Kota{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={data.city}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "city",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={`w-full px-4 py-2.5 border ${errors.city ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50`}
-                                            />
-                                            {errors.city && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.city}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Tanggal{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={data.event_date}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "event_date",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={`w-full px-4 py-2.5 border ${errors.event_date ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50`}
-                                            />
-                                            {errors.event_date && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.event_date}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Waktu (Jam){" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <input
-                                                type="time"
-                                                value={data.event_time}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "event_time",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className={`w-full px-4 py-2.5 border ${errors.event_time ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50`}
-                                            />
-                                            {errors.event_time && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.event_time}
-                                                </p>
-                                            )}
-                                        </div>
+
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Pilih Artis (Bisa Lebih Dari 1)
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                ARTIS TAMPIL <span className="text-red-500">*</span>
                                             </label>
-                                            <select
-                                                multiple
-                                                value={data.artist_ids}
-                                                onChange={handleArtistSelect}
-                                                className={`w-full px-4 py-2 border ${errors.artist_ids ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50 min-h-[120px]`}
-                                            >
-                                                {artists.map((a) => (
-                                                    <option
-                                                        key={a.id}
-                                                        value={a.id}
+
+                                            {/* Tag artis terpilih */}
+                                            {selectedArtists.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {selectedArtists.map((artist) => (
+                                                        <span
+                                                            key={artist.id}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-100 shadow-sm"
+                                                        >
+                                                            {artist.name}
+                                                            {artist.genre && <span className="font-normal text-blue-400">({artist.genre})</span>}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeArtist(artist.id)}
+                                                                className="ml-1 text-blue-400 hover:text-blue-600 transition-colors focus:outline-none"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Input pencarian artis */}
+                                            <div className="relative">
+                                                <div
+                                                    className={`flex items-center gap-2 px-4 py-2.5 border ${errors.artist_ids ? "border-red-400" : "border-gray-200"} rounded-xl bg-[#fafafa] focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-colors`}
+                                                >
+                                                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                    </svg>
+                                                    <input
+                                                        ref={artistInputRef}
+                                                        type="text"
+                                                        value={artistSearch}
+                                                        onChange={(e) => {
+                                                            setArtistSearch(e.target.value);
+                                                            setShowSuggestions(true);
+                                                        }}
+                                                        onFocus={() => setShowSuggestions(true)}
+                                                        placeholder="Cari dan pilih artis..."
+                                                        className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm text-gray-800 placeholder-gray-400"
+                                                    />
+                                                </div>
+
+                                                {/* Dropdown sugesti */}
+                                                {showSuggestions && filteredArtists.length > 0 && (
+                                                    <div
+                                                        ref={suggestionsRef}
+                                                        className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
                                                     >
-                                                        {a.name} ({a.genre})
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <p className="mt-1 text-xs text-gray-400">
-                                                Tahan CTRL (Windows) atau CMD
-                                                (Mac) untuk memilih lebih dari
-                                                satu artis.
-                                            </p>
-                                            {errors.artist_ids && (
-                                                <p className="mt-1 text-xs text-red-500">
-                                                    {errors.artist_ids}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                                                Deskripsi Lengkap
-                                            </label>
-                                            <textarea
-                                                rows="4"
-                                                value={data.description}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "description",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50"
-                                            ></textarea>
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Status Publikasi{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <div className="flex gap-4">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "active"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "active",
-                                                            )
-                                                        }
-                                                    />{" "}
-                                                    <span className="text-sm">
-                                                        Aktif / Publik
-                                                    </span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "draft"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "draft",
-                                                            )
-                                                        }
-                                                    />{" "}
-                                                    <span className="text-sm">
-                                                        Draft
-                                                    </span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "completed"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "completed",
-                                                            )
-                                                        }
-                                                    />{" "}
-                                                    <span className="text-sm">
-                                                        Selesai
-                                                    </span>
-                                                </label>
+                                                        {filteredArtists.slice(0, 8).map((artist) => (
+                                                            <button
+                                                                key={artist.id}
+                                                                type="button"
+                                                                onClick={() => addArtist(artist)}
+                                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-blue-50 transition-colors"
+                                                            >
+                                                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0">
+                                                                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-semibold text-gray-800">{artist.name}</p>
+                                                                    {artist.genre && (
+                                                                        <p className="text-xs text-gray-400">{artist.genre}</p>
+                                                                    )}
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Pesan ketika ketik tapi tidak ada hasil */}
+                                                {showSuggestions && artistSearch.trim() && filteredArtists.length === 0 && (
+                                                    <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-3 text-sm text-gray-500">
+                                                        Tidak ada artis ditemukan untuk "{artistSearch}"
+                                                    </div>
+                                                )}
                                             </div>
+                                            {errors.artist_ids && <p className="mt-1 text-xs text-red-500">{errors.artist_ids}</p>}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">
-                                        <h3 className="text-sm font-bold text-gray-900">
-                                            2. Kategori Tiket{" "}
-                                            <span className="text-red-500">
-                                                *
-                                            </span>
+                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wide">
+                                            KATEGORI TIKET <span className="text-red-500">*</span>
                                         </h3>
                                         <button
                                             type="button"
                                             onClick={addCategory}
-                                            className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                                            className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
                                         >
-                                            + Tambah Kategori
+                                            <span>+ Tambah Kategori</span>
                                         </button>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        {data.ticket_categories.map(
-                                            (cat, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex gap-3 items-start bg-gray-50 p-4 rounded-xl border border-gray-100"
-                                                >
-                                                    <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                            Nama Kategori
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={
-                                                                cat.category_name
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateCategory(
-                                                                    index,
-                                                                    "category_name",
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            required
-                                                            placeholder="Contoh: VIP"
-                                                            className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.category_name`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm`}
-                                                        />
-                                                        {errors[`ticket_categories.${index}.category_name`] && (
-                                                            <p className="mt-1 text-[10px] text-red-500">
-                                                                {errors[`ticket_categories.${index}.category_name`]}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                            Harga (Rp)
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={cat.price !== null && cat.price !== undefined && cat.price !== "" ? cat.price.toString().split(".")[0].replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""}
-                                                            onChange={(e) =>
-                                                                updateCategory(
-                                                                    index,
-                                                                    "price",
-                                                                    e.target.value.replace(/\D/g, "")
-                                                                )
-                                                            }
-                                                            required
-                                                            placeholder="1.000.000"
-                                                            className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.price`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm`}
-                                                        />
-                                                        {errors[`ticket_categories.${index}.price`] && (
-                                                            <p className="mt-1 text-[10px] text-red-500">
-                                                                {errors[`ticket_categories.${index}.price`]}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                            Kuota Total
-                                                        </label>
-                                                        <input
-                                                            type="number"
-                                                            value={
-                                                                cat.total_quota
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateCategory(
-                                                                    index,
-                                                                    "total_quota",
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            required
-                                                            min="1"
-                                                            placeholder="100"
-                                                            className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.total_quota`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm`}
-                                                        />
-                                                        {errors[`ticket_categories.${index}.total_quota`] && (
-                                                            <p className="mt-1 text-[10px] text-red-500">
-                                                                {errors[`ticket_categories.${index}.total_quota`]}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    {data.ticket_categories
-                                                        .length > 1 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                removeCategory(
-                                                                    index,
-                                                                )
-                                                            }
-                                                            className="mt-6 text-red-500 hover:text-red-700 p-2 bg-white rounded-lg border border-red-100 shadow-sm"
-                                                        >
-                                                            <svg
-                                                                className="w-5 h-5"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                                />
-                                                            </svg>
-                                                        </button>
+                                    <div className="space-y-4">
+                                        {data.ticket_categories.map((cat, index) => (
+                                            <div key={index} className="flex flex-col sm:flex-row gap-4 items-start sm:items-end bg-[#fafafa] p-4 rounded-xl border border-gray-100 relative">
+                                                <div className="absolute top-2 right-4 text-[10px] font-bold text-gray-400">
+                                                    KATEGORI {index + 1}
+                                                </div>
+                                                <div className="w-full sm:w-1/3 pt-4 sm:pt-0">
+                                                    <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                        Nama Kategori
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={cat.category_name}
+                                                        onChange={(e) => updateCategory(index, "category_name", e.target.value)}
+                                                        required
+                                                        placeholder="Contoh: VIP"
+                                                        className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.category_name`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm bg-white`}
+                                                    />
+                                                    {errors[`ticket_categories.${index}.category_name`] && (
+                                                        <p className="mt-1 text-[10px] text-red-500">{errors[`ticket_categories.${index}.category_name`]}</p>
                                                     )}
                                                 </div>
-                                            ),
-                                        )}
+                                                <div className="w-full sm:w-1/3">
+                                                    <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                        Harga (Rp)
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={cat.price !== null && cat.price !== undefined && cat.price !== "" ? cat.price.toString().split(".")[0].replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""}
+                                                        onChange={(e) => updateCategory(index, "price", e.target.value.replace(/\D/g, ""))}
+                                                        required
+                                                        placeholder="1.000.000"
+                                                        className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.price`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm bg-white`}
+                                                    />
+                                                    {errors[`ticket_categories.${index}.price`] && (
+                                                        <p className="mt-1 text-[10px] text-red-500">{errors[`ticket_categories.${index}.price`]}</p>
+                                                    )}
+                                                </div>
+                                                <div className="w-full sm:w-1/3">
+                                                    <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                        Total Kuota
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        value={cat.total_quota}
+                                                        onChange={(e) => updateCategory(index, "total_quota", e.target.value)}
+                                                        required
+                                                        min="1"
+                                                        placeholder="100"
+                                                        className={`w-full px-3 py-2 border ${errors[`ticket_categories.${index}.total_quota`] ? "border-red-400" : "border-gray-200"} rounded-lg text-sm bg-white`}
+                                                    />
+                                                    {errors[`ticket_categories.${index}.total_quota`] && (
+                                                        <p className="mt-1 text-[10px] text-red-500">{errors[`ticket_categories.${index}.total_quota`]}</p>
+                                                    )}
+                                                </div>
+                                                {data.ticket_categories.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeCategory(index)}
+                                                        className="mt-2 sm:mt-0 text-gray-400 hover:text-red-500 p-2 bg-white rounded-lg border border-gray-200 shadow-sm transition-colors"
+                                                        title="Hapus Kategori"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
-                                    {errors.ticket_categories && (
-                                        <p className="mt-2 text-xs text-red-500">
-                                            {errors.ticket_categories}
-                                        </p>
-                                    )}
+                                    {errors.ticket_categories && <p className="mt-2 text-xs text-red-500">{errors.ticket_categories}</p>}
                                 </div>
                             </form>
                         </div>

@@ -140,14 +140,11 @@ export default function EditKonser({ concert, artists }) {
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <form onSubmit={submitForm}>
                             <div className="p-6 sm:p-8 space-y-8">
-                                <div>
-                                    <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2 mb-5">
-                                        1. Informasi Dasar
-                                    </h3>
+                                <div className="space-y-5">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Nama Konser{" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                JUDUL KONSER{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
@@ -170,9 +167,9 @@ export default function EditKonser({ concert, artists }) {
                                             )}
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Banner Konser{" "}
-                                                <span className="text-gray-400 font-normal normal-case">
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                GAMBAR BANNER{" "}
+                                                <span className="text-gray-400 font-normal lowercase">
                                                     (opsional, biarkan kosong
                                                     jika tidak ingin mengubah)
                                                 </span>
@@ -200,8 +197,8 @@ export default function EditKonser({ concert, artists }) {
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Venue (Tempat){" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                NAMA VENUE{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
@@ -219,8 +216,8 @@ export default function EditKonser({ concert, artists }) {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Kota{" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                KOTA{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
@@ -238,8 +235,8 @@ export default function EditKonser({ concert, artists }) {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Tanggal{" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                TANGGAL ACARA{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
@@ -257,8 +254,8 @@ export default function EditKonser({ concert, artists }) {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Waktu (Jam){" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                WAKTU MULAI{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
@@ -276,8 +273,8 @@ export default function EditKonser({ concert, artists }) {
                                             />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
-                                                Deskripsi Lengkap
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                DESKRIPSI <span className="text-gray-400 font-normal lowercase">(opsional)</span>
                                             </label>
                                             <textarea
                                                 rows="5"
@@ -292,78 +289,29 @@ export default function EditKonser({ concert, artists }) {
                                             ></textarea>
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">
-                                                Status Publikasi{" "}
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                STATUS{" "}
                                                 <span className="text-red-500">
                                                     *
                                                 </span>
                                             </label>
-                                            <div className="flex flex-wrap gap-6">
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "active"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "active",
-                                                            )
-                                                        }
-                                                        className="text-blue-600 focus:ring-blue-500 w-4 h-4"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        Aktif / Publik
-                                                    </span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "draft"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "draft",
-                                                            )
-                                                        }
-                                                        className="text-blue-600 focus:ring-blue-500 w-4 h-4"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        Draft
-                                                    </span>
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            data.status ===
-                                                            "completed"
-                                                        }
-                                                        onChange={() =>
-                                                            setData(
-                                                                "status",
-                                                                "completed",
-                                                            )
-                                                        }
-                                                        className="text-blue-600 focus:ring-blue-500 w-4 h-4"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        Selesai
-                                                    </span>
-                                                </label>
-                                            </div>
+                                            <select
+                                                value={data.status}
+                                                onChange={(e) => setData("status", e.target.value)}
+                                                className={`w-full px-4 py-3 border ${errors.status ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+                                            >
+                                                <option value="" disabled>-- Pilih Status --</option>
+                                                <option value="active">Aktif / Publik</option>
+                                                <option value="draft">Draft</option>
+                                                <option value="completed">Selesai</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Section: Artis Tampil */}
                                 <div className="border-t border-gray-100 pt-6">
-                                    <h3 className="text-sm font-bold text-gray-900 mb-4">Artis Tampil</h3>
+                                    <h3 className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-3">ARTIS TAMPIL <span className="text-red-500">*</span></h3>
 
                                     {/* Tag artis terpilih */}
                                     {selectedArtists.length > 0 && (
@@ -458,8 +406,8 @@ export default function EditKonser({ concert, artists }) {
 
                                 <div>
                                     <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-5">
-                                        <h3 className="text-sm font-bold text-gray-900">
-                                            2. Kategori Tiket{" "}
+                                        <h3 className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide">
+                                            KATEGORI TIKET{" "}
                                             <span className="text-red-500">
                                                 *
                                             </span>
@@ -480,7 +428,7 @@ export default function EditKonser({ concert, artists }) {
                                                     className="flex flex-col sm:flex-row gap-4 items-start sm:items-end bg-gray-50/50 p-5 rounded-2xl border border-gray-200"
                                                 >
                                                     <div className="w-full sm:w-1/3">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                        <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
                                                             Nama Kategori
                                                         </label>
                                                         <input
@@ -507,7 +455,7 @@ export default function EditKonser({ concert, artists }) {
                                                         )}
                                                     </div>
                                                     <div className="w-full sm:w-1/3">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                        <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
                                                             Harga (Rp)
                                                         </label>
                                                         <input
@@ -531,8 +479,8 @@ export default function EditKonser({ concert, artists }) {
                                                         )}
                                                     </div>
                                                     <div className="w-full sm:w-1/3">
-                                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">
-                                                            Kuota Total
+                                                        <label className="block text-[10px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                            Total Kuota
                                                         </label>
                                                         <input
                                                             type="number"
