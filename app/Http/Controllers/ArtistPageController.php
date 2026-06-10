@@ -30,3 +30,4 @@ class ArtistPageController extends Controller
         ]);
     }
 }
+

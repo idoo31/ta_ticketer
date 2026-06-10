@@ -64,3 +64,5 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::put('/artis/{artis}', [ArtistController::class, 'update'])->name('admin.artists.update');
     Route::delete('/artis/{artis}', [ArtistController::class, 'destroy'])->name('admin.artists.destroy');
 });
+
+

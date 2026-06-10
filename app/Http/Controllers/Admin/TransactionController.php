@@ -14,7 +14,7 @@ class TransactionController extends Controller
     public function index(Request $request): Response
     {
         $query = Transaction::with([
-            'user:id,name,email', 
+            'user:id,name,email',
             'details:id,transaction_id,ticket_category_id,quantity,price_per_unit,subtotal',
             'details.ticketCategory:id,concert_id,category_name,price',
             'details.ticketCategory.concert:id,title,venue_name,city,event_date'
