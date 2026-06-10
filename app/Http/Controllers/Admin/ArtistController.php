@@ -23,7 +23,7 @@ class ArtistController extends Controller
         $keyword = trim($request->input('q', ''));
         $genre   = trim($request->input('genre', ''));
 
-        $artists = Artist::withTrashed()
+        $artists = Artist::query()
             ->when($keyword, fn($q) => $q->where('name', 'like', "%{$keyword}%"))
             ->when($genre,   fn($q) => $q->where('genre', $genre))
             ->orderBy('name')
@@ -36,7 +36,7 @@ class ArtistController extends Controller
         });
 
         // Daftar genre unik untuk filter dropdown
-        $genres = Artist::withTrashed()->whereNotNull('genre')->distinct()->orderBy('genre')->pluck('genre');
+        $genres = Artist::whereNotNull('genre')->distinct()->orderBy('genre')->pluck('genre');
 
         return Inertia::render('Admin/Artis', [
             'artists' => $artists,
