@@ -2,8 +2,31 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
+    }
+}
+
+@layer utilities {
+    .concert-btn {
+        transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+    }
+    .concert-btn:hover {
+        background-color: rgb(37 99 235);
+        color: #ffffff !important;
+        border-color: rgb(37 99 235);
+    }
+    .concert-btn:hover svg {
+        color: #ffffff;
+        stroke: #ffffff;
+    }
 }
