@@ -5,7 +5,7 @@ import { Head } from '@inertiajs/react';
 // Layout utama — membungkus semua halaman publik (Home, Konser, Artis, dll)
 // Props:
 //   title  — judul halaman (opsional, default: 'TICKETER')
-//   hideNavbar / hideFooter — untuk menyembunyikan navbar/footer (misal di halaman auth)
+//   hideNavbar / hideFooter — untuk menyembunyikan navbar/footer (di halaman auth)
 //   children — konten halaman
 export default function MainLayout({ title, hideNavbar = false, hideFooter = false, children }) {
     return (

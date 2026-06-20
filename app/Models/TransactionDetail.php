@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TransactionDetail extends Model
 {
+    protected $connection = 'mysql_node2';
+
+
     protected $fillable = [
         'transaction_id',
         'ticket_category_id',

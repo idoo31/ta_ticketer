@@ -64,6 +64,26 @@ return [
             ]) : [],
         ],
 
+        'mysql_node2' => [
+            'driver' => 'mysql',
+            'url' => env('DB_NODE2_URL'),
+            'host' => env('DB_NODE2_HOST', '127.0.0.1'),
+            'port' => env('DB_NODE2_PORT', '3306'),
+            'database' => env('DB_NODE2_DATABASE', 'ta_ticketer_node2'),
+            'username' => env('DB_NODE2_USERNAME', 'root'),
+            'password' => env('DB_NODE2_PASSWORD', ''),
+            'unix_socket' => env('DB_NODE2_SOCKET', ''),
+            'charset' => env('DB_NODE2_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_NODE2_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import Chart from 'chart.js/auto';
 import { formatRp } from '@/utils/formatter';
 
-export default function Dashboard({ stats, recentTransactions, chartLabels, chartValues, topConcerts }) {
+export default function Dashboard({ stats, recentTransactions, chartLabels, chartValues, topConcerts, nodeStatus }) {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -86,6 +86,18 @@ export default function Dashboard({ stats, recentTransactions, chartLabels, char
 
     return (
         <AdminLayout title="Dashboard Utama">
+            {/* System Status Bar (Distributed DB) */}
+            <div className="flex flex-wrap gap-4 mb-5">
+                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 border shadow-sm ${nodeStatus?.node1 ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${nodeStatus?.node1 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-sm font-bold">Node 1 (Master): {nodeStatus?.node1 ? 'Connected' : 'Disconnected'}</span>
+                </div>
+                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 border shadow-sm ${nodeStatus?.node2 ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${nodeStatus?.node2 ? 'bg-green-500 animate-pulse' : 'bg-red-500 animate-pulse'}`}></div>
+                    <span className="text-sm font-bold">Node 2 (Transaction): {nodeStatus?.node2 ? 'Connected' : 'Disconnected'}</span>
+                </div>
+            </div>
+
             {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between h-[110px]">

@@ -15,6 +15,8 @@ class Concert extends Model
 {
     use HasFactory;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'title',
         'venue_name',

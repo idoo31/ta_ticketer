@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
+    protected $connection = 'mysql_node2';
+
+
     protected $fillable = [
         'trx_code',
         'user_id',

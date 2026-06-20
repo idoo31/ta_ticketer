@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketCategory extends Model
 {
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'concert_id',
         'category_name',

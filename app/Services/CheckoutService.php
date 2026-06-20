@@ -92,7 +92,10 @@ class CheckoutService
      */
     public function processPayment(int $userId, string $paymentMethod, ?string $paymentProvider, ?array $paymentDetails, array $lineItems, array $totals): Transaction
     {
-        return DB::transaction(function () use ($userId, $paymentMethod, $paymentProvider, $paymentDetails, $lineItems, $totals) {
+        DB::connection('mysql')->beginTransaction();
+        DB::connection('mysql_node2')->beginTransaction();
+
+        try {
             $transaction = Transaction::create([
                 'trx_code'         => 'TRX-' . strtoupper(Str::random(8)),
                 'user_id'          => $userId,
@@ -122,7 +125,14 @@ class CheckoutService
             }
             TransactionDetail::insert($detailRows);
 
+            DB::connection('mysql')->commit();
+            DB::connection('mysql_node2')->commit();
+
             return $transaction;
-        });
+        } catch (\Exception $e) {
+            DB::connection('mysql')->rollBack();
+            DB::connection('mysql_node2')->rollBack();
+            throw $e;
+        }
     }
 }
