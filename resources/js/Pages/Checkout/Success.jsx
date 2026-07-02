@@ -1,7 +1,7 @@
 import MainLayout from '@/Layouts/MainLayout';
-
 // Halaman Sukses Pembayaran
-export default function Success() {
+export default function Success({ trxCode }) {
+
     return (
         <MainLayout title="Pembayaran Berhasil">
             <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '24px 0' }}>

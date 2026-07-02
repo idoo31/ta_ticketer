@@ -111,6 +111,7 @@ class CheckoutService
 
             $now        = now();
             $detailRows = [];
+            
             foreach ($lineItems as $item) {
                 $detailRows[] = [
                     'transaction_id'     => $transaction->id,
@@ -121,6 +122,7 @@ class CheckoutService
                     'created_at'         => $now,
                     'updated_at'         => $now,
                 ];
+                
                 $item['category']->decrement('available_quota', $item['qty']);
             }
             TransactionDetail::insert($detailRows);

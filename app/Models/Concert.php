@@ -26,6 +26,8 @@ class Concert extends Model
         'description',
         'banner_url',
         'status',
+        'latitude',
+        'longitude',
     ];
 
     protected function casts(): array

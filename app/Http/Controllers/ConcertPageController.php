@@ -65,9 +65,24 @@ class ConcertPageController extends Controller
         ]);
     }
 
-    public function show(Concert $concert): Response
+    public function show(Concert $concert, \App\Services\WeatherService $weatherService): Response
     {
         $concert->load('ticketCategories', 'artists');
+        
+        $weather = null;
+        if ($concert->city && $concert->event_date) {
+            $eventDateTime = clone $concert->event_date;
+            if ($concert->event_time) {
+                $timeParts = explode(':', $concert->event_time);
+                $eventDateTime->setTime((int)($timeParts[0] ?? 0), (int)($timeParts[1] ?? 0));
+            }
+            $weather = $weatherService->getForecastForEvent(
+                $concert->city,
+                $eventDateTime,
+                $concert->latitude ? (float) $concert->latitude : null,
+                $concert->longitude ? (float) $concert->longitude : null
+            );
+        }
 
         return Inertia::render('KonserDetail', [
             'concert' => [
@@ -80,6 +95,9 @@ class ConcertPageController extends Controller
                 'event_date_long'     => $concert->event_date ? $concert->event_date->translatedFormat('l, d F Y') : '',
                 'event_time'          => $concert->event_time,
                 'banner_url'          => image_url($concert->banner_url),
+                'latitude'            => $concert->latitude,
+                'longitude'           => $concert->longitude,
+                'weather'             => $weather,
                 'ticket_categories'   => $concert->ticketCategories->map(fn($cat) => [
                     'id'              => $cat->id,
                     'category_name'   => $cat->category_name,

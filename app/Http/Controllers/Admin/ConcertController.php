@@ -94,6 +94,8 @@ class ConcertController extends Controller
             'description' => $validated['description'] ?? null,
             'status'      => $validated['status'],
             'banner_url'  => $bannerUrl,
+            'latitude'    => $validated['latitude'] ?? null,
+            'longitude'   => $validated['longitude'] ?? null,
         ]);
 
         // --- BULK INSERT: satu query untuk semua kategori tiket ---
@@ -133,21 +135,23 @@ class ConcertController extends Controller
         $artists = Artist::active()->orderBy('name')->get(['id', 'name', 'genre']);
         
         $concertData = [
-            'id' => $concert->id,
-            'title' => $concert->title,
-            'venue_name' => $concert->venue_name,
-            'city' => $concert->city,
-            'event_date' => $concert->event_date ? $concert->event_date->format('Y-m-d') : '',
-            'event_time' => $concert->event_time ? substr($concert->event_time, 0, 5) : '',
-            'description' => $concert->description,
-            'status' => $concert->status,
-            'banner_url' => image_url($concert->banner_url),
-            'artists' => $concert->artists->map(fn($a) => ['id' => $a->id, 'name' => $a->name])->toArray(),
+            'id'                => $concert->id,
+            'title'             => $concert->title,
+            'venue_name'        => $concert->venue_name,
+            'city'              => $concert->city,
+            'event_date'        => $concert->event_date ? $concert->event_date->format('Y-m-d') : '',
+            'event_time'        => $concert->event_time ? substr($concert->event_time, 0, 5) : '',
+            'description'       => $concert->description,
+            'status'            => $concert->status,
+            'banner_url'        => image_url($concert->banner_url),
+            'latitude'          => $concert->latitude,
+            'longitude'         => $concert->longitude,
+            'artists'           => $concert->artists->map(fn($a) => ['id' => $a->id, 'name' => $a->name])->toArray(),
             'ticket_categories' => $concert->ticketCategories->map(fn($tc) => [
-                'id' => $tc->id,
+                'id'            => $tc->id,
                 'category_name' => $tc->category_name,
-                'price' => $tc->price,
-                'total_quota' => $tc->total_quota,
+                'price'         => $tc->price,
+                'total_quota'   => $tc->total_quota,
             ])->toArray()
         ];
         
@@ -190,14 +194,18 @@ class ConcertController extends Controller
             'description' => $validated['description'] ?? null,
             'status'      => $validated['status'],
             'banner_url'  => $bannerUrl,
+            'latitude'    => $validated['latitude'] ?? null,
+            'longitude'   => $validated['longitude'] ?? null,
         ]);
 
         // --- UPDATE KATEGORI TIKET ---
-        $existingCategories = $concert->ticketCategories()->withCount('transactionDetails')->get();
+        // PENTING: Gunakan with() lalu hitung manual dengan PHP, jangan gunakan withCount()
+        // karena transactionDetails berada di database yang berbeda (mysql_node2).
+        $existingCategories = $concert->ticketCategories()->with('transactionDetails:id,ticket_category_id')->get();
         $newCategories       = array_values($validated['ticket_categories']);
 
-        $deletable = $existingCategories->filter(fn($c) => $c->transaction_details_count === 0);
-        $protected = $existingCategories->filter(fn($c) => $c->transaction_details_count  > 0)->values();
+        $deletable = $existingCategories->filter(fn($c) => $c->transactionDetails->count() === 0);
+        $protected = $existingCategories->filter(fn($c) => $c->transactionDetails->count()  > 0)->values();
 
         if ($deletable->isNotEmpty()) {
             TicketCategory::whereIn('id', $deletable->pluck('id'))->delete();
@@ -253,7 +261,9 @@ class ConcertController extends Controller
     public function destroy(Concert $concert): RedirectResponse
     {
         // Cek apakah ada tiket kategori yang sudah memiliki transaksi
-        $hasTransactions = $concert->ticketCategories()->whereHas('transactionDetails')->exists();
+        // PENTING: Jangan gunakan whereHas karena beda database (mysql_node2).
+        $ticketCategoryIds = $concert->ticketCategories()->pluck('id');
+        $hasTransactions = \App\Models\TransactionDetail::whereIn('ticket_category_id', $ticketCategoryIds)->exists();
 
         if ($hasTransactions) {
             return redirect()

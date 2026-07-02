@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { router, useForm, usePage } from "@inertiajs/react";
+import VenueSearchPicker from "@/Components/VenueSearchPicker";
 
 export default function EditKonser({ concert, artists }) {
     const { errors: pageErrors, flash } = usePage().props;
@@ -16,6 +17,8 @@ export default function EditKonser({ concert, artists }) {
         event_time: concert.event_time || "",
         description: concert.description || "",
         status: concert.status || "active",
+        latitude: concert.latitude || "",
+        longitude: concert.longitude || "",
         artist_ids: concert.artists.map((a) => a.id.toString()) || [],
         ticket_categories: concert.ticket_categories || [
             { category_name: "Festival", price: "", total_quota: "" },
@@ -196,42 +199,51 @@ export default function EditKonser({ concert, artists }) {
                                                 </p>
                                             )}
                                         </div>
+                                        {/* VENUE SEARCH — Nominatim API */}
+                                        <div className="col-span-2">
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                CARI / UBAH LOKASI VENUE
+                                            </label>
+                                            <VenueSearchPicker
+                                                initialLat={data.latitude}
+                                                initialLng={data.longitude}
+                                                initialVenueName={data.venue_name}
+                                                onSelect={(result) => {
+                                                    setData(prev => ({
+                                                        ...prev,
+                                                        venue_name: result.venueName || prev.venue_name,
+                                                        city: result.city || prev.city,
+                                                        latitude: result.lat ? result.lat.toString() : prev.latitude,
+                                                        longitude: result.lng ? result.lng.toString() : prev.longitude,
+                                                    }));
+                                                }}
+                                            />
+                                        </div>
+
                                         <div>
                                             <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
                                                 NAMA VENUE{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.venue_name}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "venue_name",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("venue_name", e.target.value)}
                                                 className={`w-full px-4 py-2.5 border ${errors.venue_name ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50/50`}
+                                                placeholder="Nama venue"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
                                                 KOTA{" "}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                <span className="text-red-500">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={data.city}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        "city",
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => setData("city", e.target.value)}
                                                 className={`w-full px-4 py-2.5 border ${errors.city ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-gray-50/50`}
+                                                placeholder="Kota"
                                             />
                                         </div>
                                         <div>

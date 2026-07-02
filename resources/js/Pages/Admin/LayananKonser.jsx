@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { formatRp } from "@/utils/formatter";
+import VenueSearchPicker from "@/Components/VenueSearchPicker";
 
 export default function LayananKonser({ concerts, filters, artists }) {
     const { errors: pageErrors, flash } = usePage().props;
@@ -23,6 +24,8 @@ export default function LayananKonser({ concerts, filters, artists }) {
             event_time: "",
             description: "",
             status: "active",
+            latitude: "",
+            longitude: "",
             artist_ids: [],
             ticket_categories: [
                 { category_name: "Festival", price: "", total_quota: "" },
@@ -418,6 +421,28 @@ export default function LayananKonser({ concerts, filters, artists }) {
                                             {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
                                         </div>
 
+                                         {/* VENUE SEARCH — Nominatim API */}
+                                        <div className="md:col-span-2">
+                                            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
+                                                CARI LOKASI VENUE <span className="text-red-500">*</span>
+                                            </label>
+                                            <VenueSearchPicker
+                                                onSelect={(result) => {
+                                                    setData(prev => ({
+                                                        ...prev,
+                                                        venue_name: result.venueName || prev.venue_name,
+                                                        city: result.city || prev.city,
+                                                        latitude: result.lat ? result.lat.toString() : prev.latitude,
+                                                        longitude: result.lng ? result.lng.toString() : prev.longitude,
+                                                    }));
+                                                }}
+                                            />
+                                            {(errors.venue_name || errors.city) && (
+                                                <p className="mt-1 text-xs text-red-500">{errors.venue_name || errors.city}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Venue Name & City - still editable manually */}
                                         <div>
                                             <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wide mb-1.5">
                                                 NAMA VENUE <span className="text-red-500">*</span>
@@ -427,9 +452,8 @@ export default function LayananKonser({ concerts, filters, artists }) {
                                                 value={data.venue_name}
                                                 onChange={(e) => setData("venue_name", e.target.value)}
                                                 className={`w-full px-4 py-3 border ${errors.venue_name ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
-                                                placeholder="Contoh: Gelora Bung Karno"
+                                                placeholder="Terisi otomatis dari pencarian"
                                             />
-                                            {errors.venue_name && <p className="mt-1 text-xs text-red-500">{errors.venue_name}</p>}
                                         </div>
 
                                         <div>
@@ -441,9 +465,8 @@ export default function LayananKonser({ concerts, filters, artists }) {
                                                 value={data.city}
                                                 onChange={(e) => setData("city", e.target.value)}
                                                 className={`w-full px-4 py-3 border ${errors.city ? "border-red-400" : "border-gray-200"} rounded-xl text-sm bg-[#fafafa] focus:bg-white transition-colors`}
-                                                placeholder="Contoh: Jakarta"
+                                                placeholder="Terisi otomatis dari pencarian"
                                             />
-                                            {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                                         </div>
 
                                         <div>

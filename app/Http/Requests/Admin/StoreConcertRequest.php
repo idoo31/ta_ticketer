@@ -30,6 +30,8 @@ class StoreConcertRequest extends FormRequest
             'description'                        => ['nullable', 'string'],
             'status'                             => ['required', 'in:active,draft,completed'],
             'banner'                             => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'latitude'                           => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'                          => ['nullable', 'numeric', 'between:-180,180'],
             'artist_ids'                         => ['required', 'array', 'min:1'],
             'artist_ids.*'                       => ['integer', 'exists:artists,id'],
             'ticket_categories'                  => ['required', 'array', 'min:1'],

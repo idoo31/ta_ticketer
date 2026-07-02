@@ -97,8 +97,9 @@ class DashboardController extends Controller
                     ->get();
 
                 $grouped = $details->groupBy('ticketCategory.concert_id')->map(function ($items) {
-                    $concert = $items->first()->ticketCategory->concert;
-                    if (!$concert) return null;
+                    $category = $items->first()->ticketCategory;
+                    if (!$category || !$category->concert) return null;
+                    $concert = $category->concert;
                     return [
                         'id' => $concert->id,
                         'title' => $concert->title,

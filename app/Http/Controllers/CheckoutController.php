@@ -178,7 +178,7 @@ class CheckoutController extends Controller
         }
 
         // Process payment
-        $checkoutService->processPayment(
+        $transaction = $checkoutService->processPayment(
             Auth::id(),
             $validated['payment_method'],
             $paymentProvider,
@@ -190,14 +190,20 @@ class CheckoutController extends Controller
         // Bersihkan cart setelah berhasil
         session()->forget("cart.{$concert->id}");
 
-        return redirect()->route('checkout.success', $concert);
+        // Redirect ke halaman success
+        return redirect()->route('checkout.success', [
+            'concert' => $concert->id,
+            'trx_code' => $transaction->trx_code
+        ])->with('success', 'Pembayaran berhasil dan tiket telah terbit.');
     }
 
     /**
      * Step 3 – Halaman sukses.
      */
-    public function success(Concert $concert): Response
+    public function success(Request $request, Concert $concert): Response
     {
-        return Inertia::render('Checkout/Success');
+        return Inertia::render('Checkout/Success', [
+            'trxCode' => $request->query('trx_code')
+        ]);
     }
 }

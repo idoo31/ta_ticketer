@@ -23,11 +23,16 @@ class TransactionController extends Controller
 
         if ($request->filled('q')) {
             $keyword = $request->q;
-            $query->where('trx_code', 'like', "%{$keyword}%")
-                ->orWhereHas('user', function ($q) use ($keyword) {
-                    $q->where('name', 'like', "%{$keyword}%")
-                        ->orWhere('email', 'like', "%{$keyword}%");
-                });
+            
+            // Cari user IDs terlebih dahulu dari mysql_node1 (karena Transaction di mysql_node2)
+            $userIds = \App\Models\User::where('name', 'like', "%{$keyword}%")
+                ->orWhere('email', 'like', "%{$keyword}%")
+                ->pluck('id');
+
+            $query->where(function($q) use ($keyword, $userIds) {
+                $q->where('trx_code', 'like', "%{$keyword}%")
+                  ->orWhereIn('user_id', $userIds);
+            });
         }
 
         $transactions = $query->paginate(15);

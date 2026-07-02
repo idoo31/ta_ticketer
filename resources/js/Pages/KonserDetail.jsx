@@ -2,6 +2,19 @@ import { useState } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { usePage } from '@inertiajs/react';
 import { formatRp } from '@/utils/formatter';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet default marker icon
+const DefaultIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 // Halaman detail konser + pilih tiket
 // Props dari ConcertPageController: concert (dengan ticketCategories & artists)
@@ -130,6 +143,23 @@ export default function KonserDetail({ concert }) {
                                             <p className="text-xs sm:text-sm text-slate-400 m-0">{concert.city}</p>
                                         </div>
                                     </div>
+                                    {/* Weather Widget */}
+                                    {concert.weather && (
+                                        <div className="flex items-center gap-4 mt-1 p-3 bg-amber-50/50 border border-amber-100/50 rounded-xl">
+                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100/50 flex items-center justify-center shrink-0">
+                                                <img src={concert.weather.icon_url} alt={concert.weather.description} className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-sm" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-900 text-sm sm:text-base mb-0.5">
+                                                    {concert.weather.temp}°C, {concert.weather.description}
+                                                </p>
+                                                <p className="text-[10px] sm:text-xs text-slate-500 m-0 flex items-center gap-1">
+                                                    <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    Prakiraan Cuaca Acara
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -180,6 +210,58 @@ export default function KonserDetail({ concert }) {
                                         {concert.description || 'Rasakan pengalaman tata suara terbaik bersama artis favorit Anda.'}
                                     </p>
                                 </div>
+
+                                {/* Lokasi Peta */}
+                                {concert.latitude && concert.longitude && (
+                                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mt-6 sm:mt-8 overflow-hidden">
+                                        {/* Map Header */}
+                                        <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                                <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm sm:text-base font-bold text-slate-900 m-0">Lokasi Venue</h3>
+                                                <p className="text-xs text-slate-400 m-0">{concert.venue_name}, {concert.city}</p>
+                                            </div>
+                                            <a
+                                                href={`https://www.google.com/maps/search/?api=1&query=${concert.latitude},${concert.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-blue-500 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                Buka di Google Maps
+                                            </a>
+                                        </div>
+                                        {/* Map Container */}
+                                        <div className="h-[320px] sm:h-[420px] w-full relative">
+                                            <MapContainer
+                                                center={[parseFloat(concert.latitude), parseFloat(concert.longitude)]}
+                                                zoom={16}
+                                                scrollWheelZoom={false}
+                                                style={{ height: '100%', width: '100%' }}
+                                                zoomControl={true}
+                                            >
+                                                {/* ESRI WorldStreetMap - tampilan mirip Google Maps */}
+                                                <TileLayer
+                                                    attribution='&copy; Google Maps'
+                                                    url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                                                    maxZoom={19}
+                                                />
+                                                <Marker position={[parseFloat(concert.latitude), parseFloat(concert.longitude)]}>
+                                                    <Popup>
+                                                        <div style={{ minWidth: '150px' }}>
+                                                            <p style={{ fontWeight: 'bold', margin: '0 0 4px 0', fontSize: '13px' }}>{concert.venue_name}</p>
+                                                            <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>{concert.city}</p>
+                                                        </div>
+                                                    </Popup>
+                                                </Marker>
+                                            </MapContainer>
+                                        </div>
+                                    </div>
+                                )}
                             </form>
                         </div>
 

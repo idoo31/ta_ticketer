@@ -1,58 +1,182 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎫 TA Ticketer — Platform Penjualan Tiket Konser Online
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform pembelian tiket konser berbasis web yang dibangun dengan **Laravel 13**, **React (Inertia.js)**, dan arsitektur **database multi-node**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🛠️ Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Layer | Teknologi |
+|---|---|
+| Backend | Laravel 13 (PHP 8.3) |
+| Frontend | React 19 + Inertia.js |
+| Bundler | Vite 8 |
+| Database | MySQL (2 node terpisah) |
+| Styling | Tailwind CSS / Vanilla CSS |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✨ Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- 🎟️ Sistem pembelian tiket multi-kategori dengan keranjang belanja
+- 🌤️ **Widget cuaca otomatis** per konser (OpenWeatherMap API)
+- 🗺️ **Peta interaktif lokasi venue** (OpenStreetMap + Leaflet.js)
+- 🔍 Pencarian venue otomatis via Nominatim Geocoding API
+- 👤 Autentikasi pengguna + panel admin lengkap
+- 🗄️ Arsitektur database terdistribusi (Node 1: Konser, Node 2: Transaksi)
+- 📄 Cetak E-Ticket setelah pembayaran berhasil
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🌐 Microservice API yang Digunakan
 
-## Agentic Development
+| # | API | Fungsi | API Key |
+|---|---|---|---|
+| 1 | **OpenWeatherMap** | Prakiraan cuaca di halaman konser | ✅ **Wajib daftar** (Gratis) |
+| 2 | **Nominatim (OSM)** | Pencarian venue otomatis di admin | ❌ Tidak perlu |
+| 3 | **OpenStreetMap Tiles** | Peta interaktif di halaman konser | ❌ Tidak perlu |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+> **Catatan:** Hanya OpenWeatherMap yang membutuhkan API Key. Nominatim dan OpenStreetMap sepenuhnya gratis tanpa pendaftaran.
+
+---
+
+## ⚙️ Cara Setup Lokal (Setelah Clone)
+
+### 1. Clone Repository
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/USERNAME/ta_ticketer.git
+cd ta_ticketer
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependencies
 
-## Contributing
+```bash
+composer install
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Buat File `.env`
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Konfigurasi `.env`
 
-## Security Vulnerabilities
+Buka file `.env` dan isi bagian berikut:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+# --- Database Node 1 (Data Konser, User, dll.) ---
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ticketer
+DB_USERNAME=root
+DB_PASSWORD=
 
-## License
+# --- Database Node 2 (Transaksi) ---
+DB_NODE2_HOST=127.0.0.1
+DB_NODE2_PORT=3306
+DB_NODE2_DATABASE=ta_ticketer_node2
+DB_NODE2_USERNAME=root
+DB_NODE2_PASSWORD=
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# --- Microservice API Key ---
+OPENWEATHER_API_KEY=ISI_API_KEY_KAMU_DISINI
+```
+
+### 5. Cara Mendapatkan OpenWeatherMap API Key (Gratis)
+
+1. Buka: **https://home.openweathermap.org/users/sign_up**
+2. Daftar akun gratis (cukup email + password)
+3. Cek email untuk verifikasi akun
+4. Login, lalu buka: **https://home.openweathermap.org/api_keys**
+5. Copy API Key yang tertera, lalu paste ke `.env` pada baris `OPENWEATHER_API_KEY=`
+
+> ⚠️ API Key baru biasanya aktif dalam **10–60 menit** setelah pendaftaran.
+
+### 6. Buat Database & Jalankan Migrasi
+
+Buat dua database di MySQL (misalnya via phpMyAdmin atau HeidiSQL):
+- `ticketer` (untuk Node 1)
+- `ta_ticketer_node2` (untuk Node 2)
+
+Lalu jalankan:
+
+```bash
+php artisan migrate --database=mysql
+php artisan migrate --database=mysql_node2
+```
+
+Opsional — isi data contoh:
+
+```bash
+php artisan db:seed
+```
+
+### 7. Buat Storage Link
+
+```bash
+php artisan storage:link
+```
+
+### 8. Jalankan Aplikasi
+
+Buka **dua terminal** secara bersamaan:
+
+**Terminal 1 — Backend (PHP):**
+```bash
+php artisan serve
+```
+
+**Terminal 2 — Frontend (React/Vite):**
+```bash
+npm run dev
+```
+
+Akses aplikasi di: **http://127.0.0.1:8000**
+
+---
+
+## 👤 Akun Default (Setelah Seeder)
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@ticketer.com | password |
+| Customer | user@ticketer.com | password |
+
+---
+
+## 📁 Struktur File Penting
+
+```
+ta_ticketer/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Admin/ConcertController.php   ← CRUD konser + validasi cross-db
+│   │   ├── Admin/DashboardController.php ← Statistik multi-node
+│   │   └── CheckoutController.php        ← Alur pembelian tiket
+│   └── Services/
+│       └── WeatherService.php            ← Integrasi OpenWeatherMap API
+├── resources/js/
+│   ├── Components/
+│   │   └── VenueSearchPicker.jsx         ← Nominatim + Leaflet (Admin)
+│   └── Pages/
+│       └── KonserDetail.jsx              ← Peta + Widget Cuaca (Publik)
+└── .env.example                          ← Template konfigurasi
+```
+
+---
+
+## 📝 Catatan Teknis
+
+- **Cuaca** hanya ditampilkan jika tanggal konser **dalam 5 hari ke depan** (batas API gratis OpenWeatherMap).
+- **Peta & Geocoding** (Nominatim + OpenStreetMap) sepenuhnya **gratis dan open-source**, tidak ada batas request yang ketat.
+- Database Node 1 dan Node 2 **tidak boleh di-join** secara SQL karena beda server. Seluruh relasi lintas database diproses di level PHP (Laravel Collection).
+
+---
+
+## 📄 Lisensi
+
+Project ini dibuat untuk keperluan **Tugas Akhir (TA)**.
